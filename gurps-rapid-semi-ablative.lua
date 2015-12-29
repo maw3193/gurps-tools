@@ -6,12 +6,34 @@ local damage_roll = "6dx20 burn ex (2)"
 local hits = 4
 local dr = "1000SA,200"
 
+local damage_types = {
+    "burn",
+    "cor",
+    "cr",
+    "cut",
+    "fat",
+    "imp",
+    "pi-",
+    "pi",
+    "pi+",
+    "pi++",
+}
+
+function get_damage_type(roll)
+    for _,t in ipairs(damage_types) do
+        if roll:find(t) then
+            return t
+        end
+    end
+end
+
 function parse_damage_roll(roll)
     local dice = tonumber(roll:match("^(%d+)d"))
-    local mult = tonumber(roll:match("^%d+dx(%d+)"))
-    local divisor = tonumber(roll:match("%((%d+)%)"))
-    if dice and mult and divisor then
-        return {average=dice*3.5*mult, dice=dice, mult=mult, divisor=divisor}
+    local mult = tonumber(roll:match("^%d+dx(%d+)")) or 1
+    local divisor = tonumber(roll:match("%((%d+)%)")) or 1
+    local type = get_damage_type(roll)
+    if dice  and type then
+        return {average=dice*3.5*mult, dice=dice, mult=mult, divisor=divisor, type=type}
     else
         print("Failed to parse damage roll '"..roll.."'")
         os.exit(1)
@@ -82,6 +104,8 @@ function calculate_penetrating_damage(roll, hits, dr)
             local damage_loss = layer.current / div
             if layer.ablativeness == "ablative" then
                 layer.current = layer.current - remaining_damage
+            elseif roll.type == "cor" then
+                layer.current = layer.current - remaining_damage / 5
             elseif layer.ablativeness == "semi" then
                 layer.current = layer.current - remaining_damage / 10
             end
