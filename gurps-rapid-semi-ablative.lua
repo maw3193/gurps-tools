@@ -2,9 +2,9 @@
 
 -- parse attack roll, given in the form of a damage roll (to parse), a number of hits, and the DR.
 
-local damage_roll = "6dx20 burn ex (2)"
-local hits = 4
-local dr = "1000SA,200"
+local damage_roll
+local hits = 1
+local dr = 0
 
 local damage_types = {
     "burn",
@@ -136,16 +136,21 @@ for i,v in ipairs(arg) do
     end
 end
 
-local damage = calculate_penetrating_damage(parse_damage_roll(damage_roll),
-                             hits, parse_dr(dr))
---[[
-for k,v in pairs(d) do
-    print(k,v)
+if damage_roll then
+
+    local damage = calculate_penetrating_damage(parse_damage_roll(damage_roll),
+                                                hits, parse_dr(dr))
+    print(damage)
+else
+    print([[
+No defined damage!
+Define a damage roll with "--roll=$ROLL",
+where $ROLL is in the format $DICEdx$MULT $TYPE ... ($DIVISOR),
+e.g. 6dx20 burn ex (2)
+
+You will also want to define a number of hits with "--hits=$HITS"
+and the structure of their DR with a comma-separated list of the format
+"--DR=$TOTAL1[H$HARDENED1][A|SA][,...]", e.g.
+1000SA,200
+]])
 end
-for _,v in ipairs(r) do
-    for k,v2 in pairs(v) do
-        print(k,v2)
-    end
-end
---]]
-print(damage)
